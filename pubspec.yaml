@@ -38,7 +38,7 @@ dependencies:
   flutter_local_notifications: ^17.1.2 # أو أي إصدار يتوافق مع مشروعك
   provider: ^6.1.2
   flutter_youtube_view: ^2.0.4
-  youtube_player_flutter: ^9.0.1
+  youtube_player_flutter: ^9.0.3
 #  shared_preferences: ^2.0.13  # قد يكون رقم الإصدار مختلفاً
   shared_preferences: ^2.0.8
 #  flutter_circular_countdown_timer: ^0.2.1

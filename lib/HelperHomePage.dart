@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'ContactUserPage.dart'; // استدعاء صفحة الاتصال الجديدة
 
 class HelperHomePage extends StatefulWidget {
   @override
@@ -25,12 +26,12 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome Dr. Esraa!'),
+        title: Text('مرحباً د.إسراء'),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'Track progress'),
-            Tab(text: 'Contact user'),
+            Tab(text: 'تتبع التقدم'),
+            Tab(text: 'التواصل مع المستخدم'),
           ],
         ),
       ),
@@ -38,7 +39,7 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
         controller: _tabController,
         children: [
           _buildTrackProgressTab(),
-          _buildContactUserTab(),
+          ContactUserPage(), // استدعاء صفحة الاتصال الجديدة هنا
         ],
       ),
     );
@@ -75,15 +76,17 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Mohamed Ahmed',
+                                  'محمد أحمد',
                                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(height: 5),
-                                Text('26 years', style: TextStyle(fontSize: 16)),
-                                SizedBox(height: 10),
-                                Text('Number of tests: 85', style: TextStyle(fontSize: 16)),
-                                Text('Current mood: Good', style: TextStyle(fontSize: 16)),
-                                Text('The result of the last test: 18/20', style: TextStyle(fontSize: 16)),
+                                SizedBox(height: 20),
+                                Text('العمر: 26', style: TextStyle(fontSize: 16)),
+                                Divider(thickness: 2),
+                                Text('عدد الإختبارات: 85', style: TextStyle(fontSize: 16)),
+                                Divider(thickness: 2),
+                                Text('الحالة المزاجية الحالية: جيد', style: TextStyle(fontSize: 13)),
+                                Divider(thickness: 2),
+                                Text('نتيجة آخر إختبار: 18/20', style: TextStyle(fontSize: 14)),
                               ],
                             ),
                           ),
@@ -97,7 +100,7 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
             SizedBox(height: 50),
             // قسم التحليلات
             Text(
-              'Analytics',
+              'التحليلات',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
@@ -178,11 +181,5 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
         titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), // تصغير حجم النص
       ),
     ];
-  }
-
-  Widget _buildContactUserTab() {
-    return Center(
-      child: Text('Contact user page content goes here'),
-    );
   }
 }
