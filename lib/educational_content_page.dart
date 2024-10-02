@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
 
 class EducationalContentPage extends StatefulWidget {
   @override
@@ -8,17 +10,7 @@ class EducationalContentPage extends StatefulWidget {
 
 class _EducationalContentPageState extends State<EducationalContentPage> {
   late YoutubePlayerController _controller;
-  final List<String> _videoUrls = [
-    'https://youtu.be/FlYecOowUUc?si=ui4jA1fZZoO89tXX',
-    'https://youtu.be/pPWUcbIgMiE?si=wNd6T9fBmSG7zXRh',
-    'https://youtu.be/Uwoek18h8aQ?si=7RG1AhOV5AjwCqz7',
-    'https://youtu.be/-q7ddrV72Tw?si=DJB6fq7MNqX8sDwi',
-    'https://youtu.be/j-1n3KJR1I8?si=zDN4DldcwSnkJ8us',
-    'https://youtu.be/pJ0auP7dbcY?si=5s214c_UYRYq-Nfy',
-    'https://youtu.be/YoZ2s8jMeYA?si=O9n7Jam50s1roFD8',
-    'https://youtu.be/igIdKdjU5WE?si=vLjMmnMrPy93bduL',
-  ];
-
+  List<String> _videoUrls = [];
   int _currentVideoIndex = 0;
   bool _isMuted = false;
   bool _isPlaying = false;
@@ -27,18 +19,21 @@ class _EducationalContentPageState extends State<EducationalContentPage> {
   @override
   void initState() {
     super.initState();
-    _controller = YoutubePlayerController(
-      initialVideoId: YoutubePlayer.convertUrlToId(_videoUrls[_currentVideoIndex])!,
-      flags: YoutubePlayerFlags(
-        autoPlay: false,
-        mute: false,
-      ),
-    );
+    _loadVideoLinks();
+  }
 
-    _controller.addListener(() {
-      setState(() {
-        _isPlaying = _controller.value.isPlaying;
-      });
+  Future<void> _loadVideoLinks() async {
+    final String response = await rootBundle.loadString('assets/video_links.json');
+    final data = json.decode(response);
+    setState(() {
+      _videoUrls = List<String>.from(data['videos']);
+      _controller = YoutubePlayerController(
+        initialVideoId: YoutubePlayer.convertUrlToId(_videoUrls[_currentVideoIndex])!,
+        flags: YoutubePlayerFlags(
+          autoPlay: false,
+          mute: false,
+        ),
+      );
     });
   }
 

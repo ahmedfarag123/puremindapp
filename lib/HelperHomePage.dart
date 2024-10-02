@@ -1,19 +1,29 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'ContactUserPage.dart'; // استدعاء صفحة الاتصال الجديدة
 
 class HelperHomePage extends StatefulWidget {
+  final String email;  // إضافة البريد الإلكتروني
+  final String password;  // إضافة كلمة المرور
+
+  HelperHomePage({required this.email, required this.password}); // تمرير البريد الإلكتروني وكلمة المرور
+
   @override
   _HelperHomePageState createState() => _HelperHomePageState();
 }
 
 class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  String username = 'د.إسراء'; // القيمة الافتراضية التي سيتم استبدالها لاحقًا
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    loadUserData(); // استدعاء الدالة لتحميل بيانات المستخدم
   }
 
   @override
@@ -22,11 +32,37 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
     super.dispose();
   }
 
+  // دالة لتحميل بيانات المستخدم من ملف JSON بناءً على البريد الإلكتروني وكلمة المرور
+  Future<void> loadUserData() async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final File file = File('${directory.path}/users.json');
+
+    if (await file.exists()) {
+      String jsonString = await file.readAsString();
+      List<dynamic> users = json.decode(jsonString);
+
+      // البحث عن المستخدم الذي يتطابق مع البريد الإلكتروني وكلمة المرور
+      final user = users.firstWhere(
+            (user) => user['email'] == widget.email && user['password'] == widget.password,
+        orElse: () => null,
+      );
+
+      if (user != null) {
+        setState(() {
+          username = user['username']; // تعيين اسم المستخدم
+        });
+      } else {
+        // التعامل مع حالة عدم العثور على المستخدم
+        print('User not found');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('مرحباً د.إسراء'),
+        title: Text('مرحباً د.$username'), // عرض اسم المستخدم هنا
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -76,7 +112,7 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'محمد أحمد',
+                                  'محمد عبدالوهاب', // عرض اسم المستخدم هنا أيضًا
                                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(height: 20),

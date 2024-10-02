@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login_as.dart';
+import 'login_user_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 3));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const LoginAs()),
+      MaterialPageRoute(builder: (context) => const LoginUserPage()),
     );
   }
 

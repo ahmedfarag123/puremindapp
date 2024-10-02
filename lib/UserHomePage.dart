@@ -1,15 +1,61 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'educational_content_page.dart';
 import 'consultant_content_page.dart';
 import 'track_mood_status_page.dart';
 
-class UserHomePage extends StatelessWidget {
-  const UserHomePage({super.key});
+class UserHomePage extends StatefulWidget {
+  final String email; // إضافة البريد الإلكتروني
+  final String password; // إضافة كلمة المرور
+
+  const UserHomePage({super.key, required this.email, required this.password});
+
+  @override
+  _UserHomePageState createState() => _UserHomePageState();
+}
+
+class _UserHomePageState extends State<UserHomePage> {
+  String username = 'Loading...'; // قيمة افتراضية حتى يتم تحميل البيانات
+  String selectedSubject = 'Select subject';
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData(); // استدعاء الدالة لتحميل بيانات المستخدم عند بدء الصفحة
+  }
+
+  // دالة لتحميل بيانات المستخدم من ملف JSON
+  Future<void> loadUserData() async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final File file = File('${directory.path}/users.json');
+
+    if (await file.exists()) {
+      String jsonString = await file.readAsString();
+      List<dynamic> users = json.decode(jsonString);
+
+      // البحث عن المستخدم الذي يتطابق مع البريد الإلكتروني وكلمة المرور
+      var matchedUser = users.firstWhere(
+            (user) =>
+        user['email'] == widget.email && user['password'] == widget.password,
+        orElse: () => null,
+      );
+
+      if (matchedUser != null) {
+        setState(() {
+          username = matchedUser['username']; // تعيين اسم المستخدم
+        });
+      } else {
+        setState(() {
+          username = 'User not found'; // في حال لم يتم العثور على المستخدم
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    String selectedSubject = 'Select subject';
-
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: GestureDetector(
@@ -38,10 +84,9 @@ class UserHomePage extends StatelessWidget {
                         children: <Widget>[
                           const SizedBox(height: 10),
                           Container(
-                            child: const Text(
-                              'Welcome Ahmed!',
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 20),
+                            child: Text(
+                              'مرحبا  $username', // عرض اسم المستخدم
+                              style: TextStyle(color: Colors.black, fontSize: 20),
                             ),
                           ),
                           const SizedBox(height: 20),

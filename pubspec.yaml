@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
   fl_chart: ^0.40.0
   intl: ^0.19.0
+  excel: ^2.0.2
+  path_provider: ^2.0.13
 #  intl_arb: ^2.0.8
   page_transition: ^2.0.9
   flutter_staggered_grid_view: ^0.7.0
@@ -69,6 +71,8 @@ flutter:
     - assets/bg.png
     - assets/bg2.png
     - assets/logo.png
+    - assets/video_links.json
+    - assets/users.json
 
 
 

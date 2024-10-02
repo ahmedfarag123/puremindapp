@@ -1,0 +1,14 @@
+[
+  {
+    "email": "user1@example.com",
+    "username": "user1",
+    "password": "password1"
+    "userType": "عادي"
+  },
+  {
+    "email": "user2@example.com",
+    "username": "user2",
+    "password": "password2"
+    "userType": "مساعد"
+  }
+]

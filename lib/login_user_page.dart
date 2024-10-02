@@ -1,12 +1,43 @@
 import 'package:flutter/material.dart';
 import 'UserHomePage.dart';
+import 'HelperHomePage.dart'; // تأكد من استيراد الصفحة الصحيحة
 import 'sign_up_page.dart';
+import 'dart:convert'; // لإدارة ملفات JSON
+import 'package:path_provider/path_provider.dart'; // للوصول إلى مسار تخزين الملفات
+import 'dart:io'; // للتعامل مع الملفات
 
 class LoginUserPage extends StatelessWidget {
   const LoginUserPage({super.key});
 
+  // دالة لتحميل بيانات المستخدمين من ملف JSON
+  Future<List<dynamic>> loadUserData() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/users.json');
+
+    // تحقق مما إذا كان الملف موجودًا
+    if (await file.exists()) {
+      String jsonString = await file.readAsString();
+      return json.decode(jsonString); // تحويل JSON إلى قائمة
+    }
+    return []; // إذا لم يوجد بيانات
+  }
+
+  // دالة للتحقق من بيانات تسجيل الدخول
+  Future<Map<String, dynamic>?> checkLogin(String email, String password) async {
+    List<dynamic> users = await loadUserData();
+    for (var user in users) {
+      if (user['email'] == email && user['password'] == password) {
+        return user; // إرجاع بيانات المستخدم
+      }
+    }
+    return null; // بيانات غير صحيحة
+  }
+
   @override
   Widget build(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: GestureDetector(
@@ -39,26 +70,22 @@ class LoginUserPage extends StatelessWidget {
                             width: 300,
                             height: 250,
                           ),
-                          Container(
-                            child: const Text(
-                              'تسجيل الدخول كمستخدم عادي',
-                              style: TextStyle(color: Colors.black, fontSize: 15), // لون النص الخاص بالزر
-                            ),
-                          ),
+
                           const SizedBox(height: 20),
                           Container(
                             width: 300,
                             height: 50,
                             child: TextField(
+                              controller: emailController,
                               decoration: InputDecoration(
                                 hintText: 'البريد الإلكتروني / الهاتف',
                                 hintStyle: TextStyle(
-                                  color: Colors.black45 , // لون النص
-                                  fontSize: 16, // حجم الخط
-                                  fontStyle: FontStyle.italic, // نمط الخط (اختياري)
-                                  fontWeight: FontWeight.normal, // وزن الخط (اختياري)
+                                  color: Colors.black45,
+                                  fontSize: 16,
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.normal,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // التباعد العمودي والأفقي
+                                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   borderSide: BorderSide(width: 2.0),
@@ -66,14 +93,14 @@ class LoginUserPage extends StatelessWidget {
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   borderSide: BorderSide(
-                                    color: Colors.green  , // لون الحدود عندما يكون TextField مفعلاً
+                                    color: Colors.green,
                                     width: 2.0,
                                   ),
                                 ),
                                 filled: true,
-                                fillColor: Colors.white, // لون الخلفية الأساسي
+                                fillColor: Colors.white,
                               ),
-                              style: TextStyle(color: Colors.black ), // لون النص المدخل
+                              style: TextStyle(color: Colors.black),
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -81,17 +108,18 @@ class LoginUserPage extends StatelessWidget {
                             width: 300,
                             height: 50,
                             child: TextField(
+                              controller: passwordController,
                               decoration: InputDecoration(
                                 hintText: 'الرقم السري',
                                 hintStyle: TextStyle(
-                                  color: Colors.black45 , // لون النص
-                                  fontSize: 16, // حجم الخط
-                                  fontStyle: FontStyle.italic, // نمط الخط (اختياري)
-                                  fontWeight: FontWeight.normal, // وزن الخط (اختياري)
+                                  color: Colors.black45,
+                                  fontSize: 16,
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.normal,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // التباعد العمودي والأفقي
+                                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                                 filled: true,
-                                fillColor: Colors.white , // لون الخلفية الأساسي
+                                fillColor: Colors.white,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   borderSide: BorderSide(width: 2.0),
@@ -99,26 +127,51 @@ class LoginUserPage extends StatelessWidget {
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   borderSide: BorderSide(
-                                    color: Colors.green , // لون الحدود عندما يكون TextField مفعلاً
+                                    color: Colors.green,
                                     width: 2.0,
                                   ),
                                 ),
                               ),
-                              style: TextStyle(color: Colors.black), // لون النص المدخل
+                              style: TextStyle(color: Colors.black),
                               obscureText: true,
                             ),
                           ),
                           const SizedBox(height: 20),
                           ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => UserHomePage()),
-                              );
+                            onPressed: () async {
+                              String email = emailController.text.trim();
+                              String password = passwordController.text.trim();
+
+                              // تحقق من بيانات تسجيل الدخول
+                              Map<String, dynamic>? user = await checkLogin(email, password);
+
+                              if (user != null) {
+                                // تحقق من نوع المستخدم
+                                if (user['userType'] == 'مساعد') {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => HelperHomePage(email: email, password: password), // تمرير القيم
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => UserHomePage(email: email, password: password), // تمرير القيم
+                                    ),
+                                  );
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('البريد الإلكتروني أو الرقم السري غير صحيح'),
+                                  ),
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green, // لون الخلفية للزر
-                              // padding: const EdgeInsets.symmetric(horizontal: 122, vertical: 15),
+                              backgroundColor: Colors.green,
                               padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
@@ -126,9 +179,10 @@ class LoginUserPage extends StatelessWidget {
                             ),
                             child: const Text(
                               'تسجيل الدخول',
-                              style: TextStyle(color: Colors.white), // لون النص الخاص بالزر
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
+
                           const SizedBox(height: 10),
                           GestureDetector(
                             onTap: () {
@@ -138,11 +192,9 @@ class LoginUserPage extends StatelessWidget {
                               );
                             },
                             child: const Text(
-                              // 'Create account now!',
                               'إنشاء حساب جديد',
                               style: TextStyle(
                                 color: Colors.blue,
-                                // decoration: TextDecoration.underline,
                               ),
                             ),
                           ),
@@ -165,7 +217,7 @@ class LoginUserPage extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20), // لتجنب المساحة البيضاء في الأسفل
+                          const SizedBox(height: 20),
                         ],
                       ),
                     ),
