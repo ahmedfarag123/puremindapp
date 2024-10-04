@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Used to load assets
+import 'result_test_page.dart';
 
 class TestPage extends StatefulWidget {
   @override
@@ -6,8 +9,27 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  int? _selectedAnswerQ1;
-  int? _selectedAnswerQ2;
+  List<dynamic>? questions;
+  Map<int, int?> selectedAnswers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuestions();
+  }
+
+  Future<void> _loadQuestions() async {
+    // Load JSON from the assets
+    String data = await rootBundle.loadString('assets/questions.json');
+    setState(() {
+      questions = json.decode(data);
+    });
+  }
+
+  bool _allQuestionsAnswered() {
+    // تحقق إذا كانت جميع الأسئلة تمت الإجابة عليها
+    return selectedAnswers.length == questions!.length && selectedAnswers.values.every((answer) => answer != null);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,70 +41,53 @@ class _TestPageState extends State<TestPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text('Answer the questions:', style: TextStyle(fontSize: 18)),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              // Action when menu button is pressed
-            },
-          ),
-        ],
+        title: Text('أجب على الأسئلة الآتية:', style: TextStyle(fontSize: 18)),
       ),
-      body: SingleChildScrollView(
+      body: questions == null
+          ? Center(child: CircularProgressIndicator()) // Show loading indicator until data is loaded
+          : SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Question 1
-              _buildQuestionContainer(
-                questionText: 'Q1 ?',
-                selectedAnswer: _selectedAnswerQ1,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedAnswerQ1 = value;
-                  });
-                },
-              ),
-              SizedBox(height: 16),
+              ...questions!.asMap().entries.map((entry) {
+                int index = entry.key;
+                Map<String, dynamic> question = entry.value;
 
-              // Question 2
-              _buildQuestionContainer(
-                questionText: 'Q2 ?',
-                selectedAnswer: _selectedAnswerQ2,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedAnswerQ2 = value;
-                  });
-                },
-              ),
-              SizedBox(height: 16),
-
-              // Question 1 repeated
-              _buildQuestionContainer(
-                questionText: 'Q1 ?',
-                selectedAnswer: _selectedAnswerQ1,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedAnswerQ1 = value;
-                  });
-                },
-              ),
-              SizedBox(height: 16),
-
-              // Button to show result
+                // Return each question and a SizedBox for spacing
+                return Column(
+                  children: [
+                    _buildQuestionContainer(
+                      questionText: question['question'],
+                      answers: question['answers'],
+                      selectedAnswer: selectedAnswers[index],
+                      onChanged: (value) {
+                        setState(() {
+                          selectedAnswers[index] = value;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16), // Add spacing between questions
+                  ],
+                );
+              }).toList(),
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: _allQuestionsAnswered() ? Colors.green : Colors.grey, // Change color based on state
                     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     textStyle: TextStyle(fontSize: 18),
                   ),
-                  onPressed: () {
-                    // Action when "Your mood is" button is pressed
-                  },
-                  child: Text('Your mood is:'),
+                  onPressed: _allQuestionsAnswered()
+                      ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ResultTestPage()),
+                    );
+                  }
+                      : null, // Disable button if not all questions are answered
+                  child: Text('حالتك الزاجية الأن:'),
                 ),
               ),
             ],
@@ -94,6 +99,7 @@ class _TestPageState extends State<TestPage> {
 
   Widget _buildQuestionContainer({
     required String questionText,
+    required List<dynamic> answers,
     required int? selectedAnswer,
     required ValueChanged<int?> onChanged,
   }) {
@@ -110,24 +116,16 @@ class _TestPageState extends State<TestPage> {
             questionText,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          RadioListTile<int>(
-            title: Text('Answer 1'),
-            value: 1,
-            groupValue: selectedAnswer,
-            onChanged: onChanged,
-          ),
-          RadioListTile<int>(
-            title: Text('Answer 2'),
-            value: 2,
-            groupValue: selectedAnswer,
-            onChanged: onChanged,
-          ),
-          RadioListTile<int>(
-            title: Text('Answer 3'),
-            value: 3,
-            groupValue: selectedAnswer,
-            onChanged: onChanged,
-          ),
+          ...answers.asMap().entries.map((entry) {
+            int index = entry.key;
+            String answer = entry.value;
+            return RadioListTile<int>(
+              title: Text(answer),
+              value: index,
+              groupValue: selectedAnswer,
+              onChanged: onChanged,
+            );
+          }).toList(),
         ],
       ),
     );
