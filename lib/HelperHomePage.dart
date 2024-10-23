@@ -132,7 +132,8 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
                   if (_selectedUser != null) {
                     var user = users.firstWhere((u) => u['username'] == _selectedUser);
                     tests = user['tests'] ?? 0; // عدد الاختبارات
-                    results = user['results.pop'] ?? 'لم يتم الاختبار بعد'; // نتيجة آخر اختبار
+                    results = user['results'].isNotEmpty ? user['results'].last.toString() : 'لم يتم الاختبار بعد'; // نتيجة آخر اختبار
+
                   }
                 });
               },
