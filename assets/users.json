@@ -2,13 +2,17 @@
   {
     "email": "user1@example.com",
     "username": "user1",
-    "password": "password1"
-    "userType": "عادي"
+    "password": "password1",
+    "userType": "عادي",
+    "testResults": [],
+    "testCount": 0
   },
   {
     "email": "user2@example.com",
     "username": "user2",
-    "password": "password2"
-    "userType": "مساعد"
+    "password": "password2",
+    "userType": "مساعد",
+    "testResults": [],
+    "testCount": 0
   }
 ]

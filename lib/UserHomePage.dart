@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'educational_content_page.dart';
 import 'consultant_content_page.dart';
 import 'track_mood_status_page.dart';
+import 'login_user_page.dart';
 
 class UserHomePage extends StatefulWidget {
   final String email; // إضافة البريد الإلكتروني
@@ -54,9 +55,29 @@ class _UserHomePageState extends State<UserHomePage> {
     }
   }
 
+  // عملية تسجيل الخروج
+  void _logout() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginUserPage()), // الانتقال إلى صفحة تسجيل الدخول
+          (Route<dynamic> route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      appBar: AppBar(
+        title: Text('مرحباً $username'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _logout, // عند النقر على زر تسجيل الخروج
+            tooltip: 'تسجيل الخروج',
+          ),
+        ],
+      ),
       resizeToAvoidBottomInset: true,
       body: GestureDetector(
         onTap: () {
@@ -83,12 +104,12 @@ class _UserHomePageState extends State<UserHomePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           const SizedBox(height: 10),
-                          Container(
-                            child: Text(
-                              'مرحبا  $username', // عرض اسم المستخدم
-                              style: TextStyle(color: Colors.black, fontSize: 20),
-                            ),
-                          ),
+                          // Container(
+                          //   child: Text(
+                          //     'مرحبا  $username', // عرض اسم المستخدم
+                          //     style: TextStyle(color: Colors.black, fontSize: 20),
+                          //   ),
+                          // ),
                           const SizedBox(height: 20),
                           DropdownButton<String>(
                             value: selectedSubject,

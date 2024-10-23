@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'ContactUserPage.dart'; // استدعاء صفحة الاتصال الجديدة
+import 'ContactUserPage.dart';
+import 'login_user_page.dart';
 
 class HelperHomePage extends StatefulWidget {
-  final String email;  // إضافة البريد الإلكتروني
-  final String password;  // إضافة كلمة المرور
+  final String email;
+  final String password;
 
-  HelperHomePage({required this.email, required this.password}); // تمرير البريد الإلكتروني وكلمة المرور
+  HelperHomePage({required this.email, required this.password});
 
   @override
   _HelperHomePageState createState() => _HelperHomePageState();
@@ -17,13 +18,19 @@ class HelperHomePage extends StatefulWidget {
 
 class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String username = 'د.إسراء'; // القيمة الافتراضية التي سيتم استبدالها لاحقًا
+  List<dynamic> users = [];
+  String? _selectedUser;
+  List<String> _regularUsers = [];
+  String username = 'إسراء'; // يمكنك تغيير هذا القيمة إلى اسم المساعد الذي قام بتسجيل الدخول
+  int tests = 0; // عدد الاختبارات
+  String results = 'لم يتم الاختبار بعد'; // نتيجة آخر اختبار
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    loadUserData(); // استدعاء الدالة لتحميل بيانات المستخدم
+    loadUserData();
+    _loadRegularUsers();
   }
 
   @override
@@ -32,8 +39,32 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
     super.dispose();
   }
 
-  // دالة لتحميل بيانات المستخدم من ملف JSON بناءً على البريد الإلكتروني وكلمة المرور
+  // تحميل بيانات المستخدمين من ملف JSON
   Future<void> loadUserData() async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final File file = File('${directory.path}/users.json');
+
+    if (await file.exists()) {
+      String jsonString = await file.readAsString();
+      setState(() {
+        users = json.decode(jsonString);
+      });
+    } else {
+      print('Users file not found');
+    }
+  }
+
+  // عملية تسجيل الخروج
+  void _logout() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginUserPage()), // الانتقال إلى صفحة تسجيل الدخول
+          (Route<dynamic> route) => false,
+    );
+  }
+
+  // تحميل المستخدمين العاديين
+  Future<void> _loadRegularUsers() async {
     final Directory directory = await getApplicationDocumentsDirectory();
     final File file = File('${directory.path}/users.json');
 
@@ -41,20 +72,12 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
       String jsonString = await file.readAsString();
       List<dynamic> users = json.decode(jsonString);
 
-      // البحث عن المستخدم الذي يتطابق مع البريد الإلكتروني وكلمة المرور
-      final user = users.firstWhere(
-            (user) => user['email'] == widget.email && user['password'] == widget.password,
-        orElse: () => null,
-      );
-
-      if (user != null) {
-        setState(() {
-          username = user['username']; // تعيين اسم المستخدم
-        });
-      } else {
-        // التعامل مع حالة عدم العثور على المستخدم
-        print('User not found');
-      }
+      setState(() {
+        _regularUsers = users
+            .where((user) => user['userType'] == 'عادي')
+            .map<String>((user) => user['username'] as String)
+            .toList();
+      });
     }
   }
 
@@ -62,7 +85,14 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('مرحباً د.$username'), // عرض اسم المستخدم هنا
+        title: Text('مرحباً د.$username'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _logout,
+            tooltip: 'تسجيل الخروج',
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -75,7 +105,7 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
         controller: _tabController,
         children: [
           _buildTrackProgressTab(),
-          ContactUserPage(), // استدعاء صفحة الاتصال الجديدة هنا
+          ContactUserPage(),
         ],
       ),
     );
@@ -88,7 +118,34 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // تعديل قسم البيانات الشخصية
+            // Dropdown لعرض المستخدمين
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+              ),
+              hint: Text('اختر مستخدم'),
+              value: _selectedUser,
+              onChanged: (value) {
+                setState(() {
+                  _selectedUser = value;
+                  if (_selectedUser != null) {
+                    var user = users.firstWhere((u) => u['username'] == _selectedUser);
+                    tests = user['tests'] ?? 0; // عدد الاختبارات
+                    results = user['results.pop'] ?? 'لم يتم الاختبار بعد'; // نتيجة آخر اختبار
+                  }
+                });
+              },
+              items: _regularUsers
+                  .map((user) => DropdownMenuItem(
+                value: user,
+                child: Text(user),
+              ))
+                  .toList(),
+            ),
+
+            SizedBox(height: 20),
+            // Card لعرض تفاصيل المستخدم
             Center(
               child: Card(
                 shape: RoundedRectangleBorder(
@@ -107,22 +164,18 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
                             child: Icon(Icons.person, size: 50, color: Colors.grey[700]),
                           ),
                           SizedBox(width: 20),
-                          Expanded( // استخدام Expanded لحل مشكلة تجاوز العرض
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'محمد عبدالوهاب', // عرض اسم المستخدم هنا أيضًا
+                                  _selectedUser != null ? _selectedUser! : 'اختر مستخدمًا',
                                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(height: 20),
-                                Text('العمر: 26', style: TextStyle(fontSize: 16)),
+                                Text('عدد الإختبارات: $tests', style: TextStyle(fontSize: 16)),
                                 Divider(thickness: 2),
-                                Text('عدد الإختبارات: 85', style: TextStyle(fontSize: 16)),
-                                Divider(thickness: 2),
-                                Text('الحالة المزاجية الحالية: جيد', style: TextStyle(fontSize: 13)),
-                                Divider(thickness: 2),
-                                Text('نتيجة آخر إختبار: 18/20', style: TextStyle(fontSize: 14)),
+                                Text('نتيجة آخر إختبار: $results', style: TextStyle(fontSize: 14)),
                               ],
                             ),
                           ),
@@ -134,7 +187,6 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
               ),
             ),
             SizedBox(height: 50),
-            // قسم التحليلات
             Text(
               'التحليلات',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -142,11 +194,11 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
             SizedBox(height: 10),
             Center(
               child: Container(
-                height: 300, // زيادة حجم الدائرة
+                height: 300,
                 child: PieChart(
                   PieChartData(
                     sections: _buildPieChartSections(),
-                    centerSpaceRadius: 70, // زيادة المسافة في المركز
+                    centerSpaceRadius: 70,
                     sectionsSpace: 2,
                   ),
                 ),
@@ -158,63 +210,29 @@ class _HelperHomePageState extends State<HelperHomePage> with SingleTickerProvid
     );
   }
 
+  // Pie Chart لعرض التحليلات
   List<PieChartSectionData> _buildPieChartSections() {
     return [
       PieChartSectionData(
         color: Colors.green,
         value: 17,
         title: 'Good',
-        radius: 70, // زيادة حجم الدائرة
-        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), // تصغير حجم النص
+        radius: 70,
+        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
       ),
       PieChartSectionData(
         color: Colors.red,
         value: 6,
         title: 'Not good',
-        radius: 70, // زيادة حجم الدائرة
-        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), // تصغير حجم النص
+        radius: 70,
+        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
       ),
       PieChartSectionData(
         color: Colors.blue,
         value: 14,
         title: 'Relaxation',
-        radius: 70, // زيادة حجم الدائرة
-        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), // تصغير حجم النص
-      ),
-      PieChartSectionData(
-        color: Colors.yellow,
-        value: 3,
-        title: 'Irritation',
-        radius: 70, // زيادة حجم الدائرة
-        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), // تصغير حجم النص
-      ),
-      PieChartSectionData(
-        color: Colors.orange,
-        value: 9,
-        title: 'Excitement',
-        radius: 70, // زيادة حجم الدائرة
-        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), // تصغير حجم النص
-      ),
-      PieChartSectionData(
-        color: Colors.purple,
-        value: 8,
-        title: 'Fear',
-        radius: 70, // زيادة حجم الدائرة
-        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), // تصغير حجم النص
-      ),
-      PieChartSectionData(
-        color: Colors.pink,
-        value: 13,
-        title: 'Optimism',
-        radius: 70, // زيادة حجم الدائرة
-        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), // تصغير حجم النص
-      ),
-      PieChartSectionData(
-        color: Colors.lightGreen,
-        value: 15,
-        title: 'Happy',
-        radius: 70, // زيادة حجم الدائرة
-        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), // تصغير حجم النص
+        radius: 70,
+        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
       ),
     ];
   }

@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ContactUserPage extends StatefulWidget {
   @override
@@ -8,6 +11,30 @@ class ContactUserPage extends StatefulWidget {
 class _ContactUserPageState extends State<ContactUserPage> {
   String? _selectedUser;
   final TextEditingController _messageController = TextEditingController();
+  List<String> _regularUsers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRegularUsers();
+  }
+
+  Future<void> _loadRegularUsers() async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final File file = File('${directory.path}/users.json');
+
+    if (await file.exists()) {
+      String jsonString = await file.readAsString();
+      List<dynamic> users = json.decode(jsonString);
+
+      setState(() {
+        _regularUsers = users
+            .where((user) => user['userType'] == 'عادي')
+            .map<String>((user) => user['username'] as String)
+            .toList();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +62,7 @@ class _ContactUserPageState extends State<ContactUserPage> {
                     _selectedUser = value;
                   });
                 },
-                items: ['أريام', 'شهد', 'حنين', '...']
+                items: _regularUsers
                     .map((user) => DropdownMenuItem(
                   value: user,
                   child: Text(user),
@@ -55,7 +82,8 @@ class _ContactUserPageState extends State<ContactUserPage> {
                 decoration: InputDecoration(
                   hintText: 'أكتب رسالتك هنا',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 ),
               ),
 

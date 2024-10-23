@@ -44,6 +44,8 @@ class _SignUpPageState extends State<SignUpPage> {
       'username': username,
       'password': password,
       'userType': userType,
+      'tests': 0, // عدد الاختبارات
+      'results': [] // نتائج الاختبارات
     });
 
     // حفظ البيانات في الملف
@@ -301,7 +303,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        const Text('---'),
+
                       ],
                     ),
                   ),

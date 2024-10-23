@@ -30,24 +30,31 @@ class TrackMoodStatusPage extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-
                           Container(
                             child: const Text(
                               'أختبر حالتك المزاجية الأن!',
-                              style: TextStyle(color: Colors.black, fontSize: 20), // لون النص الخاص بالزر
+                              style: TextStyle(color: Colors.black, fontSize: 20),
                             ),
                           ),
                           const SizedBox(height: 30),
                           ElevatedButton(
                             onPressed: () {
+                              // القيم الافتراضية للاختبار
+                              String userEmail = "test@example.com";
+                              String userPassword = "password123";
+
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => TestPage()),
+                                MaterialPageRoute(
+                                  builder: (context) => TestPage(
+                                    email: userEmail, // تمرير البريد الإلكتروني
+                                    password: userPassword, // تمرير كلمة المرور
+                                  ),
+                                ),
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green, // لون الخلفية للزر
-                              // padding: const EdgeInsets.symmetric(horizontal: 122, vertical: 15),
+                              backgroundColor: Colors.green,
                               padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
@@ -55,7 +62,7 @@ class TrackMoodStatusPage extends StatelessWidget {
                             ),
                             child: const Text(
                               'بدء الاختبار',
-                              style: TextStyle(color: Colors.white), // لون النص الخاص بالزر
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
                           const SizedBox(height: 20), // لتجنب المساحة البيضاء في الأسفل
