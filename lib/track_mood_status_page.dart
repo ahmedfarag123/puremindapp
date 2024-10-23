@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'TestPage.dart';
+import 'TestPage.dart'; // تأكد من استيراد TestPage
 
 class TrackMoodStatusPage extends StatelessWidget {
+  final String username; // إضافة اسم المستخدم
+
+  const TrackMoodStatusPage({super.key, required this.username}); // استلام اسم المستخدم
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,9 +43,9 @@ class TrackMoodStatusPage extends StatelessWidget {
                           const SizedBox(height: 30),
                           ElevatedButton(
                             onPressed: () {
-                              // القيم الافتراضية للاختبار
-                              String userEmail = "test@example.com";
-                              String userPassword = "password123";
+                              // تمرير البريد الإلكتروني وكلمة المرور من الصفحة الرئيسية
+                              String userEmail = "test@example.com"; // استخدم البريد الإلكتروني المناسب
+                              String userPassword = "password123"; // استخدم كلمة المرور المناسبة
 
                               Navigator.push(
                                 context,
@@ -49,6 +53,7 @@ class TrackMoodStatusPage extends StatelessWidget {
                                   builder: (context) => TestPage(
                                     email: userEmail, // تمرير البريد الإلكتروني
                                     password: userPassword, // تمرير كلمة المرور
+                                    username: username, // تمرير اسم المستخدم
                                   ),
                                 ),
                               );

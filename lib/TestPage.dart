@@ -9,8 +9,9 @@ import 'result_test_page.dart';
 class TestPage extends StatefulWidget {
   final String email;
   final String password;
+  final String username; // إضافة معامل اسم المستخدم
 
-  TestPage({required this.email, required this.password});
+  TestPage({required this.email, required this.password, required this.username}); // تعديل الباني
 
   @override
   _TestPageState createState() => _TestPageState();
@@ -76,13 +77,18 @@ class _TestPageState extends State<TestPage> {
       if (matchedUser != null) {
         setState(() {
           username = matchedUser['username']; // تعيين اسم المستخدم
-          testCount = matchedUser['testCount'] ?? 0; // تحميل عدد مرات الاختبار
+          testCount = matchedUser['tests'] ?? 0; // تحميل عدد مرات الاختبار
         });
+        print('Username: $username'); // طباعة اسم المستخدم
       } else {
         setState(() {
-          username = '1'; // في حال لم يتم العثور على المستخدم
+          username = 'User not found'; // في حال لم يتم العثور على المستخدم
         });
       }
+    } else {
+      setState(() {
+        username = 'User data file not found'; // في حال عدم وجود ملف البيانات
+      });
     }
   }
 
@@ -95,12 +101,13 @@ class _TestPageState extends State<TestPage> {
       List<dynamic> users = json.decode(jsonString);
 
       var matchedUserIndex = users.indexWhere(
-              (user) => user['email'] == widget.email && user['password'] == widget.password);
+            (user) => user['email'] == widget.email && user['password'] == widget.password,
+      );
 
       if (matchedUserIndex != -1) {
-        users[matchedUserIndex]['testCount'] = (testCount + 1); // زيادة عدد مرات الاختبار
-        users[matchedUserIndex]['testResults'] = [
-          ...(users[matchedUserIndex]['testResults'] ?? []),
+        users[matchedUserIndex]['tests'] = (testCount + 1); // زيادة عدد مرات الاختبار
+        users[matchedUserIndex]['results'] = [
+          ...(users[matchedUserIndex]['results'] ?? []),
           {
             'score': score,
             'date': DateTime.now().toIso8601String(),
@@ -137,7 +144,7 @@ class _TestPageState extends State<TestPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text('مرحباً $username'),
+        title: Text('مرحباً ${widget.username}'), // استخدام اسم المستخدم هنا
       ),
       body: selectedQuestions == null
           ? Center(child: CircularProgressIndicator())
@@ -188,7 +195,7 @@ class _TestPageState extends State<TestPage> {
                         builder: (context) => ResultTestPage(
                           selectedAnswers: selectedAnswers,
                           questions: selectedQuestions!,
-                          username: username,
+                          username: widget.username, // تمرير اسم المستخدم
                         ),
                       ),
                     );
@@ -218,9 +225,8 @@ class _TestPageState extends State<TestPage> {
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
+            spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -231,12 +237,12 @@ class _TestPageState extends State<TestPage> {
             questionText,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          ...answers.asMap().entries.map((entry) {
-            int index = entry.key;
-            String answer = entry.value;
-            return RadioListTile<int?>(
+          SizedBox(height: 8),
+          ...answers.map((answer) {
+            int answerValue = answers.indexOf(answer);
+            return RadioListTile<int>(
               title: Text(answer),
-              value: index,
+              value: answerValue,
               groupValue: selectedAnswer,
               onChanged: onChanged,
             );

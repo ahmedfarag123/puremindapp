@@ -69,7 +69,6 @@ class ResultTestPage extends StatelessWidget {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     double score = calculateScore();
@@ -97,12 +96,16 @@ class ResultTestPage extends StatelessWidget {
             children: [
               SizedBox(height: 20),
               Text(
-                score >= 50
-                    ? 'حالتك المزاجية الأن جيدة'
-                    : 'حالتك المزاجية ليست جيدة',
+                score >= 70
+                    ? 'حالتك المزاجية جيدة'
+                    : (score >= 40
+                    ? 'حالتك المزاجية متوسطة'
+                    : 'حالتك المزاجية ليست جيدة'),
                 style: TextStyle(
                   fontSize: 32,
-                  color: score >= 50 ? Colors.blue : Colors.red,
+                  color: score >= 70
+                      ? Colors.blue
+                      : (score >= 40 ? Colors.orange : Colors.red),
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
@@ -113,7 +116,9 @@ class ResultTestPage extends StatelessWidget {
                 onChanged: null, // Slider is disabled
                 min: 0,
                 max: 1,
-                activeColor: score >= 50 ? Colors.blue : Colors.red,
+                activeColor: score >= 70
+                    ? Colors.blue
+                    : (score >= 40 ? Colors.orange : Colors.red),
                 inactiveColor: Colors.grey[300],
               ),
               Text(
@@ -124,9 +129,11 @@ class ResultTestPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
-                  score >= 50
+                  score >= 70
                       ? 'إليك بعض الاقتراحات لتعزيز سعادتك. حسّن مزاجك وستشعر بتحسن أكبر!'
-                      : 'يجب أن تفكر في الاهتمام أكثر بصحتك النفسية. لا تتردد في طلب المساعدة إذا لزم الأمر.',
+                      : (score >= 40
+                      ? 'حالتك النفسية متوسطة، قد تحتاج لبعض الاهتمام الإضافي.'
+                      : 'يجب أن تفكر في الاهتمام أكثر بصحتك النفسية. لا تتردد في طلب المساعدة إذا لزم الأمر.'),
                   style: TextStyle(fontSize: 16, color: Colors.black87),
                   textAlign: TextAlign.center,
                 ),
@@ -156,4 +163,4 @@ class ResultTestPage extends StatelessWidget {
     );
   }
 }
-//......................
+//..........................

@@ -67,7 +67,6 @@ class _UserHomePageState extends State<UserHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: Text('مرحباً $username'),
         actions: [
@@ -104,12 +103,6 @@ class _UserHomePageState extends State<UserHomePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           const SizedBox(height: 10),
-                          // Container(
-                          //   child: Text(
-                          //     'مرحبا  $username', // عرض اسم المستخدم
-                          //     style: TextStyle(color: Colors.black, fontSize: 20),
-                          //   ),
-                          // ),
                           const SizedBox(height: 20),
                           DropdownButton<String>(
                             value: selectedSubject,
@@ -123,7 +116,7 @@ class _UserHomePageState extends State<UserHomePage> {
                             onChanged: (String? newValue) {
                               if (newValue != null && newValue != 'Select subject') {
                                 selectedSubject = newValue;
-                                _navigateToPage(context, newValue);
+                                _navigateToPage(context, newValue, username); // تمرير اسم المستخدم
                               }
                             },
                             items: <String>[
@@ -151,21 +144,27 @@ class _UserHomePageState extends State<UserHomePage> {
     );
   }
 
-  void _navigateToPage(BuildContext context, String subject) {
+  void _navigateToPage(BuildContext context, String subject, String username) {
     if (subject == 'Educational content') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => EducationalContentPage()),
+        MaterialPageRoute(
+          builder: (context) => EducationalContentPage(), // تمرير اسم المستخدم
+        ),
       );
     } else if (subject == 'Consultant content') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ConsultantContentPage()),
+        MaterialPageRoute(
+          builder: (context) => ConsultantContentPage(), // تمرير اسم المستخدم
+        ),
       );
     } else if (subject == 'Track mood status') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => TrackMoodStatusPage()),
+        MaterialPageRoute(
+          builder: (context) => TrackMoodStatusPage(username: username), // تمرير اسم المستخدم
+        ),
       );
     }
   }

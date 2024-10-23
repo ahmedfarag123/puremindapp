@@ -15,10 +15,8 @@ class SuggestionsPage extends StatefulWidget {
 class _SuggestionsPageState extends State<SuggestionsPage> {
   late YoutubePlayerController _controller;
   List<String> _videoUrls = [];
+  List<String> _recommendedVideos = [];
   int _currentVideoIndex = 0;
-  bool _isMuted = false;
-  bool _isPlaying = false;
-  double _currentSpeed = 1.0;
 
   @override
   void initState() {
@@ -31,8 +29,9 @@ class _SuggestionsPageState extends State<SuggestionsPage> {
     final data = json.decode(response);
     setState(() {
       _videoUrls = List<String>.from(data['videos']);
+      _setRecommendedVideos();
       _controller = YoutubePlayerController(
-        initialVideoId: YoutubePlayer.convertUrlToId(_videoUrls[_currentVideoIndex])!,
+        initialVideoId: YoutubePlayer.convertUrlToId(_recommendedVideos[_currentVideoIndex])!,
         flags: YoutubePlayerFlags(
           autoPlay: false,
           mute: false,
@@ -41,10 +40,20 @@ class _SuggestionsPageState extends State<SuggestionsPage> {
     });
   }
 
+  void _setRecommendedVideos() {
+    if (widget.score >= 70) {
+      _recommendedVideos = _videoUrls.sublist(0, 3); // من 1 إلى 3 فيديوهات
+    } else if (widget.score >= 40) {
+      _recommendedVideos = _videoUrls.sublist(3, 6); // من 4 إلى 6 فيديوهات
+    } else {
+      _recommendedVideos = _videoUrls.sublist(6, 9); // من 7 إلى 9 فيديوهات
+    }
+  }
+
   void _loadVideo(int index) {
     setState(() {
       _currentVideoIndex = index;
-      _controller.load(YoutubePlayer.convertUrlToId(_videoUrls[index])!);
+      _controller.load(YoutubePlayer.convertUrlToId(_recommendedVideos[_currentVideoIndex])!);
     });
   }
 
@@ -54,36 +63,8 @@ class _SuggestionsPageState extends State<SuggestionsPage> {
     super.dispose();
   }
 
-  void _play() {
-    setState(() {
-      _controller.play();
-      _isPlaying = true;
-    });
-  }
-
-  void _pause() {
-    setState(() {
-      _controller.pause();
-      _isPlaying = false;
-    });
-  }
-
-  void _changePlaybackSpeed(double speed) {
-    setState(() {
-      _currentSpeed = speed;
-    });
-    _controller.setPlaybackRate(speed);
-  }
-
   @override
   Widget build(BuildContext context) {
-    List<String> recommendedVideos;
-    if (widget.score >= 50) {
-      recommendedVideos = _videoUrls.sublist(0, 3); // أول 3 فيديوهات
-    } else {
-      recommendedVideos = _videoUrls.sublist(3, 6); // الثلاثة التالية
-    }
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -112,7 +93,7 @@ class _SuggestionsPageState extends State<SuggestionsPage> {
           // عرض الفيديوهات المقترحة
           Expanded(
             child: ListView.builder(
-              itemCount: recommendedVideos.length,
+              itemCount: _recommendedVideos.length,
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text('Video ${index + 1}'),
