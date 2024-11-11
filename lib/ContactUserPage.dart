@@ -36,6 +36,39 @@ class _ContactUserPageState extends State<ContactUserPage> {
     }
   }
 
+  Future<void> _sendMessageToUser() async {
+    if (_selectedUser != null && _messageController.text.isNotEmpty) {
+      final Directory directory = await getApplicationDocumentsDirectory();
+      final File file = File('${directory.path}/messages.json');
+
+      Map<String, dynamic> messagesData = {};
+
+      if (await file.exists()) {
+        String jsonString = await file.readAsString();
+        messagesData = json.decode(jsonString);
+      }
+
+      String selectedUser = _selectedUser!; // التأكيد أن القيمة غير null
+      List<String> userMessages = messagesData[selectedUser] != null
+          ? List<String>.from(messagesData[selectedUser])
+          : [];
+      userMessages.add(_messageController.text);
+
+      messagesData[selectedUser] = userMessages;
+      await file.writeAsString(json.encode(messagesData));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تم إرسال الرسالة إلى $selectedUser')),
+      );
+
+      _messageController.clear();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('الرجاء اختيار مستخدم وكتابة رسالة')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +80,7 @@ class _ContactUserPageState extends State<ContactUserPage> {
             children: [
               // Dropdown for user selection
               Text(
-                'إلي',
+                'إلى',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               DropdownButtonFormField<String>(
@@ -93,9 +126,7 @@ class _ContactUserPageState extends State<ContactUserPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Action for sending the message
-                  },
+                  onPressed: _sendMessageToUser,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),

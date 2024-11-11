@@ -6,6 +6,7 @@ import 'educational_content_page.dart';
 import 'consultant_content_page.dart';
 import 'track_mood_status_page.dart';
 import 'login_user_page.dart';
+import 'messages.dart';
 
 class UserHomePage extends StatefulWidget {
   final String email; // إضافة البريد الإلكتروني
@@ -70,6 +71,16 @@ class _UserHomePageState extends State<UserHomePage> {
       appBar: AppBar(
         title: Text('مرحباً $username'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.message),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MessagesPage(username: username)),
+              );
+            },
+            tooltip: 'الرسائل',
+          ),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: _logout, // عند النقر على زر تسجيل الخروج
@@ -149,21 +160,21 @@ class _UserHomePageState extends State<UserHomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => EducationalContentPage(), // تمرير اسم المستخدم
+          builder: (context) => EducationalContentPage(),
         ),
       );
     } else if (subject == 'Consultant content') {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ConsultantContentPage(), // تمرير اسم المستخدم
+          builder: (context) => ConsultantContentPage(),
         ),
       );
     } else if (subject == 'Track mood status') {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => TrackMoodStatusPage(username: username), // تمرير اسم المستخدم
+          builder: (context) => TrackMoodStatusPage(username: username),
         ),
       );
     }
